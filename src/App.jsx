@@ -1,14 +1,19 @@
-import React from "react";
-import { Container, Typography } from "@mui/material";
-import Home from "./components/Home";
+import React, { useState } from "react";
+import { Container } from "@mui/material";
+import SearchForm from "./components/SearchForm";
+import CountryList from "./components/CountryList";
 
 function App() {
+  const [query, setQuery] = useState("");
+
+  const handleSearch = (searchQuery) => {
+    setQuery(searchQuery.toLowerCase());
+  };
+
   return (
-    <Container>
-      <Typography variant="h3" gutterBottom align="center" sx={{ marginTop: 4 }}>
-        🌍 Busca de Países
-      </Typography>
-      <Home />
+    <Container sx={{ py: 4 }}>
+      <SearchForm onSearch={handleSearch} />
+      <CountryList query={query} />
     </Container>
   );
 }

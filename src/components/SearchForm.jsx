@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Box, TextField, Button, Typography } from "@mui/material";
+import { useState } from "react";
+import { Box, TextField, Button } from "@mui/material";
 
 function SearchForm({ onSearch }) {
   const [query, setQuery] = useState("");
@@ -7,38 +7,25 @@ function SearchForm({ onSearch }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!query.trim()) {
-      setError("O campo de busca não pode estar vazio.");
-      return;
-    }
     setError("");
+
     if (onSearch) {
-      onSearch(query);
-    }
+        onSearch(query.trim());
+      } 
+
+  };
+
+  const boxStyle = {
+    display: "flex",
+    gap: 2,
+    alignItems: "center",
+    mb: 3,
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{
-        display: "flex",
-        gap: 2,
-        alignItems: "center",
-        mb: 3,
-      }}
-    >
-      <TextField
-        label="Buscar país"
-        variant="outlined"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        error={!!error}
-        helperText={error}
-      />
-      <Button type="submit" variant="contained" color="primary">
-        Buscar
-      </Button>
+    <Box component="form" onSubmit={handleSubmit} sx={boxStyle}>
+      <TextField label="Buscar país" variant="outlined" value={query} onChange={(e) => setQuery(e.target.value)} error={!!error} helperText={error}/>
+      <Button type="submit" variant="contained" color="primary">Buscar</Button>
     </Box>
   );
 }
