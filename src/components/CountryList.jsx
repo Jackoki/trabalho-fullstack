@@ -1,47 +1,48 @@
-import { useEffect, useState } from "react";
+import { useEffect, useContext } from "react";
 import { Grid, Container, Typography, CircularProgress } from "@mui/material";
 import CountryCard from "./CountryCard";
+import { CountriesContext } from "../contexts/CountriesContext";
 
-function CountryList({ query }) {
-  const [countries, setCountries] = useState([]);
-  const [loading, setLoading] = useState(true);
+function CountryList() {
+  const { state, dispatch } = useContext(CountriesContext);
+  const { query, countries, loading, error } = state;
 
   useEffect(() => {
-    setLoading(true);
+    const fetchCountries = async () => {
+      dispatch({ type: "SET_LOADING" });
 
-    const url = query && query.trim() !== "" ? `https://restcountries.com/v3.1/name/${query}?fields=name,region,subregion,capital,languages,currencies,flags` : `https://restcountries.com/v3.1/all?fields=name,region,subregion,capital,languages,currencies,flags`;
+      const url = query && query.trim() !== "" ? `https://restcountries.com/v3.1/name/${query}?fields=name,region,subregion,capital,languages,currencies,flags` : "https://restcountries.com/v3.1/all?fields=name,region,subregion,capital,languages,currencies,flags";
 
-    fetch(url)
-      .then((res) => {
+      try {
+        const res = await fetch(url);
+
         if (!res.ok) 
           throw new Error("País não encontrado");
 
-        return res.json();
-      })
+        const data = await res.json();
 
-      .then((data) => {
         const formatted = data.map((c) => ({
           name: c.name.common,
           region: c.region,
           subregion: c.subregion,
           capital: c.capital ? c.capital[0] : "—",
           languages: c.languages ? Object.values(c.languages).join(", ") : "—",
-          currencies: c.currencies ? Object.values(c.currencies).map(cur => cur.name).join(", ") : "—",
+          currencies: c.currencies ? Object.values(c.currencies).map((cur) => cur.name).join(", ") : "—",
           flag: c.flags.png,
         }));
-        
+
         formatted.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 
-        setCountries(formatted);
-        setLoading(false);
-      })
+        dispatch({ type: "SET_COUNTRIES", payload: formatted });
+      } 
+      
+      catch (err) {
+        dispatch({ type: "SET_ERROR", payload: err.message });
+      }
+    };
 
-      .catch((err) => {
-        setCountries([]);
-        setLoading(false);
-      });
-  }, [query]);
-
+    fetchCountries();
+  }, [query, dispatch]);
 
   if (loading) {
     return (
@@ -52,17 +53,16 @@ function CountryList({ query }) {
     );
   }
 
-  if (countries.length === 0) {
+  if (error || countries.length === 0) {
     return (
       <Container sx={{ py: 4, textAlign: "center" }}>
-        <Typography>Nenhum país encontrado.</Typography>
+        <Typography>{error || "Nenhum país encontrado."}</Typography>
       </Container>
     );
   }
 
   return (
     <Container sx={{ py: 4 }}>
-
       <Typography variant="h4" gutterBottom>
         Lista de Países
       </Typography>
@@ -74,8 +74,6 @@ function CountryList({ query }) {
           </Grid>
         ))}
       </Grid>
-
-
     </Container>
   );
 }

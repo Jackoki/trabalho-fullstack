@@ -1,31 +1,53 @@
-import { useState } from "react";
-import { Box, TextField, Button } from "@mui/material";
+import { useState, useContext } from "react";
+import { Box, TextField, Button, FormHelperText } from "@mui/material";
+import { CountriesContext } from "../contexts/CountriesContext";
 
-function SearchForm({ onSearch }) {
-  const [query, setQuery] = useState("");
+const formStyle = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 0.5,
+  mx: 4,
+  mt: 6,
+  maxWidth: 500,
+};
+
+const rowStyle = {
+  display: "flex",
+  gap: 1,
+};
+
+const helperTextStyle = {
+  minHeight: "1.5em",
+};
+
+function SearchForm() {
+  const [input, setInput] = useState("");
   const [error, setError] = useState("");
+  const { dispatch } = useContext(CountriesContext);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
 
-    if (onSearch) {
-        onSearch(query.trim());
-      } 
+    const trimmed = input.trim();
+    if (!trimmed) {
+      setError("Campo de pesquisa não pode ser vazio.");
+      return;
+    }
 
-  };
-
-  const boxStyle = {
-    display: "flex",
-    gap: 2,
-    alignItems: "center",
-    mb: 3,
+    dispatch({ type: "SET_QUERY", payload: trimmed });
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={boxStyle}>
-      <TextField label="Buscar país" variant="outlined" value={query} onChange={(e) => setQuery(e.target.value)} error={!!error} helperText={error}/>
-      <Button type="submit" variant="contained" color="primary">Buscar</Button>
+    <Box component="form" onSubmit={handleSubmit} sx={formStyle}>
+      <Box sx={rowStyle}>
+        <TextField label="Buscar país" variant="outlined" value={input} onChange={(e) => setInput(e.target.value)} error={!!error} fullWidth/>
+        <Button type="submit" variant="contained" color="primary">
+          Buscar
+        </Button>
+      </Box>
+
+      <FormHelperText sx={helperTextStyle} error>{error || " "}</FormHelperText>
     </Box>
   );
 }
