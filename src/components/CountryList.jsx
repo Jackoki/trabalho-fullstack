@@ -11,54 +11,58 @@ function CountryList() {
     const fetchCountries = async () => {
       dispatch({ type: "SET_LOADING" });
 
-      const url =
-        query && query.trim() !== ""
-          ? `https://restcountries.com/v3.1/name/${query}?fields=name,region,subregion,capital,languages,currencies,flags`
-          : "https://restcountries.com/v3.1/all?fields=name,region,subregion,capital,languages,currencies,flags";
-
       try {
-        const res = await fetch(url);
+        // sempre busca todos (garante que temos todos os campos para filtrar)
+        const res = await fetch(
+          "https://restcountries.com/v3.1/all?fields=name,region,subregion,capital,languages,currencies,flags"
+        );
 
-        if (!res.ok) throw new Error("País não encontrado");
+        if (!res.ok) throw new Error("Erro ao carregar países");
 
         const data = await res.json();
 
-        // Formatar países
         const formatted = data.map((c) => ({
           name: c.name.common, // nome oficial em inglês
           region: c.region,
           subregion: c.subregion,
           capital: c.capital ? c.capital[0] : "—",
-          languages: c.languages ? Object.values(c.languages).join(", ") : "—",
+          languages: c.languages ? Object.values(c.languages) : [],
           currencies: c.currencies
-            ? Object.values(c.currencies)
-                .map((cur) => cur.name)
-                .join(", ")
-            : "—",
+            ? Object.values(c.currencies).map((cur) => cur.name)
+            : [],
           flag: c.flags.png,
         }));
 
-        // 🔎 Validação extra: só aceita se a query bater com o nome em inglês
+        let results = formatted;
+
         if (query && query.trim() !== "") {
-          const match = formatted.find(
-            (c) => c.name.toLowerCase() === query.toLowerCase()
+          const q = query.toLowerCase();
+
+          // procura em todos os campos relevantes
+          results = formatted.filter(
+            (c) =>
+              c.name.toLowerCase() === q ||
+              c.region?.toLowerCase() === q ||
+              c.subregion?.toLowerCase() === q ||
+              c.capital?.toLowerCase() === q ||
+              c.languages.some((lang) => lang.toLowerCase() === q) ||
+              c.currencies.some((cur) => cur.toLowerCase() === q)
           );
 
-          if (!match) {
+          if (results.length === 0) {
             dispatch({
               type: "SET_ERROR",
-              payload: "A pesquisa deve ser feita em inglês.",
+              payload:
+                "A pesquisa deve ser feita em inglês ou não há resultados.",
             });
             return;
           }
-
-          // mantém só o país correspondente
-          dispatch({ type: "SET_COUNTRIES", payload: [match] });
-        } else {
-          // sem query → retorna todos
-          formatted.sort((a, b) => a.name.localeCompare(b.name, "en-US"));
-          dispatch({ type: "SET_COUNTRIES", payload: formatted });
         }
+
+        // ordenar por nome
+        results.sort((a, b) => a.name.localeCompare(b.name, "en-US"));
+
+        dispatch({ type: "SET_COUNTRIES", payload: results });
       } catch (err) {
         dispatch({ type: "SET_ERROR", payload: err.message });
       }
@@ -102,5 +106,3 @@ function CountryList() {
 }
 
 export default CountryList;
-
-
