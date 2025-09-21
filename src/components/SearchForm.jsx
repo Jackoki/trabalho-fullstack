@@ -53,7 +53,7 @@ function SearchForm() {
     <Box component="form" onSubmit={handleSubmit} sx={formStyle}>
       <Box sx={rowStyle}>
         <TextField
-          label="Buscar país, região, capital, língua ou moeda"
+          label="Buscar país (em inglês)"
           variant="outlined"
           value={input}
           onChange={(e) => setInput(e.target.value)}
