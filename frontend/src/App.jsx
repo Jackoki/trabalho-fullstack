@@ -1,3 +1,5 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 // Importa o provider do contexto de países
 import { CountriesProvider } from "./contexts/CountriesContext";
 
@@ -5,21 +7,35 @@ import { CountriesProvider } from "./contexts/CountriesContext";
 import SearchForm from "./components/SearchForm";
 import CountryList from "./components/CountryList";
 import AddCountry from "./pages/AddCountry";
+import Login from "./pages/Login";
 
-// Componente principal da aplicação
 function App() {
   return (
-    // Envolve os componentes filhos com o provider do contexto
-    // Isso permite que SearchForm e CountryList acessem o estado e dispatch do contexto
-    <CountriesProvider>
-      {/* Componente de formulário de busca de países */}
-      <SearchForm />
+    <BrowserRouter>
+      <CountriesProvider>
+        
+        <Routes>
+          {/* Página principal: busca e lista */}
+          <Route
+            path="/"
+            element={
+              <>
+                <SearchForm />
+                <CountryList />
+              </>
+            }
+          />
 
-      {/* Componente que lista os países retornados da pesquisa */}
-      <CountryList />
-    </CountriesProvider>
+          {/* Página de Login */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Página para adicionar país */}
+          <Route path="/add-country" element={<AddCountry />} />
+        </Routes>
+        
+      </CountriesProvider>
+    </BrowserRouter>
   );
 }
 
-// Exporta o componente App como padrão
 export default App;
