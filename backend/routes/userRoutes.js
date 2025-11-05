@@ -1,10 +1,28 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import { body, validationResult } from "express-validator";
 import { UserModel } from "../models/UserModel.js";
 
 const router = express.Router();
 
-router.post("/register", async (req, res) => {
+const validateUser = [
+  body("username")
+    .trim()
+    .notEmpty().withMessage("Usuário é obrigatório")
+    .isLength({ min: 3 }).withMessage("Usuário deve ter ao menos 3 caracteres")
+    .escape(),
+  body("password")
+    .trim()
+    .notEmpty().withMessage("Senha é obrigatória")
+    .isLength({ min: 4 }).withMessage("Senha deve ter ao menos 4 caracteres")
+    .escape(),
+];
+
+router.post("/register", validateUser, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty())
+    return res.status(400).json({ errors: errors.array() });
+
   try {
     const { username, password } = req.body;
 
@@ -30,7 +48,11 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", validateUser, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty())
+    return res.status(400).json({ errors: errors.array() });
+
   try {
     const { username, password } = req.body;
 

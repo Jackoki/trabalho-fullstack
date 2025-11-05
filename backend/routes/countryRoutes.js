@@ -1,9 +1,46 @@
 import express from "express";
+import { body, validationResult } from "express-validator";
 import { CountryModel } from "../models/CountryModel.js";
 import { authenticateToken } from "../config/authMiddleware.js";
 
-
 const router = express.Router();
+
+const validateCountry = [
+  body("name")
+    .trim()
+    .notEmpty().withMessage("O nome do país é obrigatório.")
+    .isLength({ max: 100 }).withMessage("O nome deve ter no máximo 100 caracteres.")
+    .escape(),
+
+  body("region")
+    .trim()
+    .notEmpty().withMessage("A região é obrigatória.")
+    .isLength({ max: 100 }).withMessage("A região deve ter no máximo 100 caracteres.")
+    .escape(),
+
+  body("subregion")
+    .optional()
+    .trim()
+    .isLength({ max: 100 }).withMessage("A sub-região deve ter no máximo 100 caracteres.")
+    .escape(),
+
+  body("flag")
+    .optional()
+    .isURL().withMessage("A URL da bandeira deve ser válida.")
+    .trim(),
+
+  body("capitals")
+    .optional()
+    .isArray().withMessage("Capitais deve ser uma lista (array)."),
+
+  body("languages")
+    .optional()
+    .isArray().withMessage("Idiomas deve ser uma lista (array)."),
+
+  body("currencies")
+    .optional()
+    .isArray().withMessage("Moedas deve ser uma lista (array)."),
+];
 
 router.get("/", authenticateToken, async (req, res) => {
   try {
@@ -34,7 +71,15 @@ router.get("/:name", authenticateToken, async (req, res) => {
   }
 });
 
-router.post("/", authenticateToken, async (req, res) => {
+router.post("/", authenticateToken, validateCountry, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      message: "Erro de validação nos dados enviados.",
+      errors: errors.array(),
+    });
+  }
+
   try {
     const { name, region, subregion, flag, capitals, languages, currencies } = req.body;
 
