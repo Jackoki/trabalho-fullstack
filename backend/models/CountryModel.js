@@ -1,8 +1,8 @@
-import { pool } from "../config/db.js";
+import { db } from "../config/db.js";
 
 export class CountryModel {
   static async create({ name, region, subregion, flag, capitals, languages, currencies }) {
-    const conn = await pool.getConnection();
+    const conn = await db.getConnection();
     try {
       await conn.beginTransaction();
 
@@ -37,12 +37,12 @@ export class CountryModel {
   }
 
   static async getAll() {
-    const [countries] = await pool.query("SELECT * FROM countries");
+    const [countries] = await db.query("SELECT * FROM countries");
 
     for (const c of countries) {
-      const [capitals] = await pool.query("SELECT name FROM capitals WHERE country_id = ?", [c.id]);
-      const [languages] = await pool.query("SELECT name FROM languages WHERE country_id = ?", [c.id]);
-      const [currencies] = await pool.query("SELECT name FROM currencies WHERE country_id = ?", [c.id]);
+      const [capitals] = await db.query("SELECT name FROM capitals WHERE country_id = ?", [c.id]);
+      const [languages] = await db.query("SELECT name FROM languages WHERE country_id = ?", [c.id]);
+      const [currencies] = await db.query("SELECT name FROM currencies WHERE country_id = ?", [c.id]);
 
       c.capitals = capitals.map((x) => x.name);
       c.languages = languages.map((x) => x.name);
@@ -53,15 +53,15 @@ export class CountryModel {
   }
 
   static async getByName(name) {
-    const [rows] = await pool.query("SELECT * FROM countries WHERE name = ?", [name]);
+    const [rows] = await db.query("SELECT * FROM countries WHERE name = ?", [name]);
     const country = rows[0];
     
     if (!country) 
       return null;
 
-    const [capitals] = await pool.query("SELECT name FROM capitals WHERE country_id = ?", [country.id]);
-    const [languages] = await pool.query("SELECT name FROM languages WHERE country_id = ?", [country.id]);
-    const [currencies] = await pool.query("SELECT name FROM currencies WHERE country_id = ?", [country.id]);
+    const [capitals] = await db.query("SELECT name FROM capitals WHERE country_id = ?", [country.id]);
+    const [languages] = await db.query("SELECT name FROM languages WHERE country_id = ?", [country.id]);
+    const [currencies] = await db.query("SELECT name FROM currencies WHERE country_id = ?", [country.id]);
 
     country.capitals = capitals.map((x) => x.name);
     country.languages = languages.map((x) => x.name);
@@ -71,6 +71,6 @@ export class CountryModel {
   }
 
   static async deleteById(id) {
-    await pool.query("DELETE FROM countries WHERE id = ?", [id]);
+    await db.query("DELETE FROM countries WHERE id = ?", [id]);
   }
 }

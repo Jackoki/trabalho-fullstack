@@ -1,8 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import userRoutes from "./src/routes/userRoutes.js";
-import countryRoutes from "./src/routes/countryRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import countryRoutes from "./routes/countryRoutes.js";
 
 dotenv.config();
 
