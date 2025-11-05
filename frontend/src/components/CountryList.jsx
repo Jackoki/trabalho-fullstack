@@ -2,6 +2,9 @@ import { useEffect, useContext } from "react";
 import { Grid, Container, Typography, CircularProgress } from "@mui/material";
 import CountryCard from "./CountryCard";
 import { CountriesContext } from "../contexts/CountriesContext";
+import { Link } from "react-router-dom";
+import { Button } from "@mui/material";
+
 
 function CountryList() {
   // Pega o estado global e a função dispatch do contexto
@@ -111,6 +114,15 @@ function CountryList() {
       <Typography variant="h4" gutterBottom>
         Lista de Países
       </Typography>
+
+      <Button
+        variant="contained"
+        component={Link}
+        to="/add-country"
+        sx={{ mb: 3 }}
+      >
+        Adicionar Novo País
+      </Button>
 
       <Grid container spacing={3} justifyContent="center" alignItems="center">
         {/* Itera sobre os países e renderiza um CountryCard para cada */}

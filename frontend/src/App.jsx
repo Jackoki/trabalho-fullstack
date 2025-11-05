@@ -4,6 +4,7 @@ import { CountriesProvider } from "./contexts/CountriesContext";
 // Importa os componentes da aplicação
 import SearchForm from "./components/SearchForm";
 import CountryList from "./components/CountryList";
+import AddCountry from "./pages/AddCountry";
 
 // Componente principal da aplicação
 function App() {
