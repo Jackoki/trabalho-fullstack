@@ -1,0 +1,1 @@
+export const tokenBlacklist = new Set(); // armazena tokens inválidos

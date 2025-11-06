@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { AuthContext } from "../contexts/AuthContext";
 import {
   Container,
   TextField,
@@ -10,6 +11,7 @@ import {
 } from "@mui/material";
 
 function Login() {
+  const { login } = useContext(AuthContext);
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState(""); // mensagem de erro detalhada
   const [loading, setLoading] = useState(false);
@@ -33,7 +35,7 @@ function Login() {
       const data = await res.json();
 
       if (res.ok) {
-        localStorage.setItem("token", data.token);
+        login(data.token);
         window.location.href = "/countries";
       } else {
         // Aqui exibimos a mensagem específica retornada pelo backend

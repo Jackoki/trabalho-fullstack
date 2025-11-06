@@ -1,5 +1,6 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import rateLimit from "express-rate-limit";
 import { body, validationResult } from "express-validator";
 import { UserModel } from "../models/UserModel.js";
 import { LogModel } from "../models/LogModel.js";
@@ -18,6 +19,12 @@ const validateUser = [
     .isLength({ min: 4 }).withMessage("Senha deve ter ao menos 4 caracteres")
     .escape(),
 ];
+
+const loginRateLimit = rateLimit({
+  windowMs: 60 * 1000, // 1 minuto
+  max: 5, // máximo 5 tentativas por minuto
+  message: { message: "Muitas tentativas. Tente novamente em 1 minuto." }
+});
 
 router.post("/register", validateUser, async (req, res) => {
   const errors = validationResult(req);
@@ -55,7 +62,7 @@ router.post("/register", validateUser, async (req, res) => {
   }
 });
 
-router.post("/login", validateUser, async (req, res) => {
+router.post("/login", loginRateLimit, validateUser, async (req, res) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -100,6 +107,12 @@ router.post("/login", validateUser, async (req, res) => {
   // Agora retorna o erro específico
   res.status(500).json({ message: error.message });
   }
+});
+
+router.post("/logout", authenticateToken, (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  tokenBlacklist.add(token); // adiciona token ao blacklist
+  res.json({ message: "Logout realizado com sucesso" });
 });
 
 export default router;
