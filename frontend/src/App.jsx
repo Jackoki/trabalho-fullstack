@@ -1,38 +1,45 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-
-// Importa o provider do contexto de países
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CountriesProvider } from "./contexts/CountriesContext";
 
-// Importa os componentes da aplicação
 import SearchForm from "./components/SearchForm";
 import CountryList from "./components/CountryList";
 import AddCountry from "./pages/AddCountry";
 import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
+import LogoutButton from "./components/LogoutButton";
 
 function App() {
+  const isLoggedIn = !!localStorage.getItem("token");
+
   return (
     <BrowserRouter>
       <CountriesProvider>
-        
         <Routes>
-          {/* Página principal: busca e lista */}
-          <Route
-            path="/"
-            element={
-              <>
-                <SearchForm />
-                <CountryList />
-              </>
+          <Route path="/" element={<Login />} />
+
+          <Route path="/countries" element={
+              <ProtectedRoute>
+                <>
+                  <LogoutButton />
+                  <SearchForm />
+                  <CountryList />
+                </>
+              </ProtectedRoute>
             }
           />
 
-          {/* Página de Login */}
-          <Route path="/login" element={<Login />} />
+          <Route path="/add-country" element={
+              <ProtectedRoute>
+                <>
+                  <LogoutButton />
+                  <AddCountry />
+                </>
+              </ProtectedRoute>
+            }
+          />
 
-          {/* Página para adicionar país */}
-          <Route path="/add-country" element={<AddCountry />} />
+          <Route path="*" element={isLoggedIn ? (<Navigate to="/countries" replace />) : (<Navigate to="/" replace />)}/>
         </Routes>
-        
       </CountriesProvider>
     </BrowserRouter>
   );

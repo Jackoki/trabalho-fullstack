@@ -2,6 +2,7 @@ import express from "express";
 import { body, validationResult } from "express-validator";
 import { CountryModel } from "../models/CountryModel.js";
 import { authenticateToken } from "../config/authMiddleware.js";
+import { LogModel } from "../models/LogModel.js";
 
 const router = express.Router();
 
@@ -48,8 +49,8 @@ router.get("/", authenticateToken, async (req, res) => {
     res.json(countries);
   } 
   
-  catch (error) {
-    console.error("Erro ao listar países:", error);
+  catch (error) {    
+    await LogModel.create(username, "list_countries", "error", error.message);
     res.status(500).json({ message: "Erro ao listar países" });
   }
 });
@@ -59,32 +60,35 @@ router.get("/:name", authenticateToken, async (req, res) => {
     const { name } = req.params;
     const country = await CountryModel.getByName(name);
 
-    if (!country)
+    if (!country) {
+      await LogModel.create(username, "get_country", "error", `País '${name}' não encontrado`);
       return res.status(404).json({ message: "País não encontrado" });
+    }
 
     res.json(country);
   } 
   
-  catch (error) {
-    console.error("Erro ao buscar país:", error);
+  catch (error) {    
+    await LogModel.create(username, "get_country", "error", error.message);
     res.status(500).json({ message: "Erro ao buscar país" });
   }
 });
 
 router.post("/", authenticateToken, validateCountry, async (req, res) => {
   const errors = validationResult(req);
+
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      message: "Erro de validação nos dados enviados.",
-      errors: errors.array(),
-    });
+    await LogModel.create(username, "create_country", "error", "Erro de validação nos dados enviados");
+    return res.status(400).json({message: "Erro de validação nos dados enviados.", errors: errors.array()});
   }
 
   try {
     const { name, region, subregion, flag, capitals, languages, currencies } = req.body;
 
-    if (!name || !region)
+    if (!name || !region) {
+      await LogModel.create(username, "create_country", "error", "Campos obrigatórios ausentes");
       return res.status(400).json({ message: "Campos obrigatórios ausentes" });
+    }
 
     const countryId = await CountryModel.create({
       name,
@@ -102,8 +106,8 @@ router.post("/", authenticateToken, validateCountry, async (req, res) => {
     });
   } 
   
-  catch (error) {
-    console.error("Erro ao criar país:", error);
+  catch (error) {    
+    await LogModel.create(username, "create_country", "error", error.message);
     res.status(500).json({ message: "Erro ao criar país" });
   }
 });

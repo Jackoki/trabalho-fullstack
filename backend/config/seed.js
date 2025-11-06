@@ -32,18 +32,25 @@ export async function seedDatabase() {
   for (const country of defaultCountries) {
     const [rows] = await db.query("SELECT id FROM countries WHERE name = ?", [country.name]);
     if (rows.length === 0) {
-      await db.query(
-        "INSERT INTO countries (name, region, subregion, flag, capitals, languages, currencies) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        [
-          country.name,
-          country.region,
-          country.subregion,
-          country.flag,
-          JSON.stringify(country.capitals),
-          JSON.stringify(country.languages),
-          JSON.stringify(country.currencies),
-        ]
+      const [result] = await db.query(
+        "INSERT INTO countries (name, region, subregion, flag) VALUES (?, ?, ?, ?)",
+        [country.name, country.region, country.subregion, country.flag]
       );
+
+      const countryId = result.insertId;
+
+      for (const capital of country.capitals) {
+        await db.query("INSERT INTO capitals (country_id, name) VALUES (?, ?)", [countryId, capital]);
+      }
+
+      for (const lang of country.languages) {
+        await db.query("INSERT INTO languages (country_id, name) VALUES (?, ?)", [countryId, lang]);
+      }
+
+      for (const curr of country.currencies) {
+        await db.query("INSERT INTO currencies (country_id, name) VALUES (?, ?)", [countryId, curr]);
+      }
     }
   }
+
 }

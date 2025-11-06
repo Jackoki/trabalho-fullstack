@@ -2,6 +2,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import { body, validationResult } from "express-validator";
 import { UserModel } from "../models/UserModel.js";
+import { LogModel } from "../models/LogModel.js";
 
 const router = express.Router();
 
@@ -20,19 +21,25 @@ const validateUser = [
 
 router.post("/register", validateUser, async (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty())
+  if (!errors.isEmpty()) {
+    await LogModel.create(null, "register", "error", "Validação falhou");
     return res.status(400).json({ errors: errors.array() });
+  }
 
   try {
     const { username, password } = req.body;
 
-    if (!username || !password)
+    if (!username || !password) {
+      await LogModel.create(username, "register", "error", "Campos obrigatórios ausentes");
       return res.status(400).json({ message: "Usuário e senha são obrigatórios" });
+    }
 
     const existingUser = await UserModel.findByUsername(username);
 
-    if (existingUser)
+    if (existingUser) {
+      await LogModel.create(username, "register", "error", "Usuário já cadastrado");
       return res.status(400).json({ message: "Usuário já cadastrado!" });
+    }
 
     await UserModel.create(username, password);
 
@@ -43,26 +50,35 @@ router.post("/register", validateUser, async (req, res) => {
   } 
   
   catch (error) {
-    console.error("Erro no registro:", error);
+    await LogModel.create(req.body.username, "register", "error", error.message);
     res.status(500).json({ message: "Erro ao registrar usuário" });
   }
 });
 
 router.post("/login", validateUser, async (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty())
+
+  if (!errors.isEmpty()) {
+    await LogModel.create(null, "login", "error", "Validação falhou");
     return res.status(400).json({ errors: errors.array() });
+  }
 
   try {
     const { username, password } = req.body;
 
     const user = await UserModel.findByUsername(username);
-    if (!user)
-      return res.status(401).json({ message: "Usuário não encontrado" });
 
-    const validPassword = await UserModel.validatePassword(user, password);
-    if (!validPassword)
+    if (!user) {
+      await LogModel.create(username, "login", "error", "Usuário não encontrado");
+      return res.status(401).json({ message: "Usuário não encontrado" });
+    }
+
+    const validPassword = await UserModel.validatePassword(user, password);    
+
+    if (!validPassword) {
+      await LogModel.create(username, "login", "error", "Senha incorreta");
       return res.status(401).json({ message: "Senha incorreta" });
+    }
 
     const token = jwt.sign(
       { id: user.id, username: user.username },
@@ -74,7 +90,7 @@ router.post("/login", validateUser, async (req, res) => {
   } 
   
   catch (error) {
-    console.error("Erro no login:", error);
+    await LogModel.create(req.body.username, "login", "error", error.message);
     res.status(500).json({ message: "Erro ao fazer login" });
   }
 });

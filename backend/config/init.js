@@ -1,7 +1,7 @@
-import { pool } from "./db.js";
+import { db } from "./db.js";
 
 export async function initDatabase() {
-  const conn = await pool.getConnection();
+  const conn = await db.getConnection();
 
   await conn.query(`
     CREATE TABLE IF NOT EXISTS users (
@@ -47,6 +47,20 @@ export async function initDatabase() {
       FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE
     );
   `);
+
+  await conn.query(`
+    CREATE TABLE IF NOT EXISTS logs ( 
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user VARCHAR(100),
+      action VARCHAR(100),
+      status VARCHAR(50),
+      message TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+
+  
 
   conn.release();
 }
