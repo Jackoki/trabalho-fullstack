@@ -90,8 +90,15 @@ router.post("/login", validateUser, async (req, res) => {
   } 
   
   catch (error) {
-    await LogModel.create(req.body.username, "login", "error", error.message);
-    res.status(500).json({ message: "Erro ao fazer login" });
+  await LogModel.create({
+    username: req.body.username,
+    action: "login",
+    status: "error",
+    message: error.message
+  });
+
+  // Agora retorna o erro específico
+  res.status(500).json({ message: error.message });
   }
 });
 
