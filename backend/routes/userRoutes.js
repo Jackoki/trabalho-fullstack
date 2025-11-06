@@ -4,6 +4,7 @@ import rateLimit from "express-rate-limit";
 import { body, validationResult } from "express-validator";
 import { UserModel } from "../models/UserModel.js";
 import { LogModel } from "../models/LogModel.js";
+import { authenticateToken } from "../config/authMiddleware.js";
 
 const router = express.Router();
 
@@ -21,8 +22,8 @@ const validateUser = [
 ];
 
 const loginRateLimit = rateLimit({
-  windowMs: 60 * 1000, // 1 minuto
-  max: 5, // máximo 5 tentativas por minuto
+  windowMs: 60 * 1000,
+  max: 5,
   message: { message: "Muitas tentativas. Tente novamente em 1 minuto." }
 });
 
@@ -104,14 +105,13 @@ router.post("/login", loginRateLimit, validateUser, async (req, res) => {
     message: error.message
   });
 
-  // Agora retorna o erro específico
   res.status(500).json({ message: error.message });
   }
 });
 
 router.post("/logout", authenticateToken, (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
-  tokenBlacklist.add(token); // adiciona token ao blacklist
+  tokenBlacklist.add(token);
   res.json({ message: "Logout realizado com sucesso" });
 });
 

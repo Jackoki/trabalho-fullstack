@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     if (token) {
-      await fetch("http://localhost:4000/api/users/logout", {
+      await fetch("http://localhost:443/api/users/logout", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });

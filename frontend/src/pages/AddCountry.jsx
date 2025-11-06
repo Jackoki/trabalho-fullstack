@@ -42,7 +42,7 @@ function AddCountry() {
       currencies: form.currencies.split(",").map((c) => c.trim()),
     };
 
-    const res = await fetch("http://localhost:4000/api/countries", {
+    const res = await fetch("http://localhost:443/api/countries", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

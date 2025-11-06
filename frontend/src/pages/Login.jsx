@@ -13,12 +13,12 @@ import {
 function Login() {
   const { login } = useContext(AuthContext);
   const [form, setForm] = useState({ username: "", password: "" });
-  const [error, setError] = useState(""); // mensagem de erro detalhada
+  const [error, setError] = useState(""); 
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setError(""); // limpa erro ao digitar novamente
+    setError("");
   };
 
   const handleSubmit = async (e) => {
@@ -26,7 +26,7 @@ function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:4000/api/users/login", {
+      const res = await fetch("http://localhost:443/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -37,11 +37,14 @@ function Login() {
       if (res.ok) {
         login(data.token);
         window.location.href = "/countries";
-      } else {
-        // Aqui exibimos a mensagem específica retornada pelo backend
+      } 
+
+      else {
         setError(data.message || "Erro ao fazer login");
       }
-    } catch (err) {
+    } 
+    
+    catch (err) {
       setError("Erro ao conectar ao servidor");
     }
 
