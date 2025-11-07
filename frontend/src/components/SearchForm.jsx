@@ -25,9 +25,6 @@ function SearchForm() {
   const [error, setError] = useState("");
   const { dispatch } = useContext(CountriesContext);
 
-  // regex que detecta caracteres acentuados comuns em português/espanhol/francês
-  const nonEnglishChars = /[à-úÀ-ÚçÇñÑ]/;
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
@@ -39,27 +36,13 @@ function SearchForm() {
       return;
     }
 
-    // 🔎 Verificação de caracteres não ingleses
-    if (nonEnglishChars.test(trimmed)) {
-      setError("A pesquisa deve ser feita em inglês (sem acentos).");
-      return;
-    }
-
-    // Se passou pelas validações, envia para o contexto
     dispatch({ type: "SET_QUERY", payload: trimmed });
   };
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={formStyle}>
       <Box sx={rowStyle}>
-        <TextField
-          label="Buscar país (em inglês)"
-          variant="outlined"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          error={!!error}
-          fullWidth
-        />
+        <TextField label="Buscar país" variant="outlined" value={input} onChange={(e) => setInput(e.target.value)} error={!!error} fullWidth/>
         <Button type="submit" variant="contained" color="primary">
           Buscar
         </Button>
