@@ -52,7 +52,6 @@ function AddCountry() {
     });
 
     if (res.ok) {
-      alert("País inserido com sucesso!");
       navigate("/countries");
     } 
     

@@ -38,14 +38,14 @@ router.post("/register", validateUser, async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-      await LogModel.create(username, "register", "error", "Campos obrigatórios ausentes");
+      await LogModel.create(req.user?.username || "unknown", "register", "error", "Campos obrigatórios ausentes");
       return res.status(400).json({ message: "Usuário e senha são obrigatórios" });
     }
 
     const existingUser = await UserModel.findByUsername(username);
 
     if (existingUser) {
-      await LogModel.create(username, "register", "error", "Usuário já cadastrado");
+      await LogModel.create(req.user?.username || "unknown", "register", "error", "Usuário já cadastrado");
       return res.status(400).json({ message: "Usuário já cadastrado!" });
     }
 
@@ -58,7 +58,7 @@ router.post("/register", validateUser, async (req, res) => {
   } 
   
   catch (error) {
-    await LogModel.create(req.body.username, "register", "error", error.message);
+    await LogModel.create(req.user?.username || "unknown", "register", "error", error.message);
     res.status(500).json({ message: "Erro ao registrar usuário" });
   }
 });
@@ -77,14 +77,14 @@ router.post("/login", loginRateLimit, validateUser, async (req, res) => {
     const user = await UserModel.findByUsername(username);
 
     if (!user) {
-      await LogModel.create(username, "login", "error", "Usuário não encontrado");
+      await LogModel.create(req.user?.username || "unknown", "login", "error", "Usuário não encontrado");
       return res.status(401).json({ message: "Usuário não encontrado" });
     }
 
     const validPassword = await UserModel.validatePassword(user, password);    
 
     if (!validPassword) {
-      await LogModel.create(username, "login", "error", "Senha incorreta");
+      await LogModel.create(req.user?.username || "unknown", "login", "error", "Senha incorreta");
       return res.status(401).json({ message: "Senha incorreta" });
     }
 

@@ -69,8 +69,4 @@ export class CountryModel {
 
     return country;
   }
-
-  static async deleteById(id) {
-    await db.query("DELETE FROM countries WHERE id = ?", [id]);
-  }
 }
