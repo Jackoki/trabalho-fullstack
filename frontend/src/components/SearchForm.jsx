@@ -1,58 +1,84 @@
-import { useState, useContext } from "react";
-import { Box, TextField, Button, FormHelperText } from "@mui/material";
-import { CountriesContext } from "../contexts/CountriesContext";
+import { Card, CardContent, CardMedia, Typography } from "@mui/material";
+import PropTypes from "prop-types";
 
-const formStyle = {
+// Estilo do card principal 
+const boxStyle = {
+  width: 300,
+  height: 380,
+  borderRadius: 2,
+  boxShadow: 3,
   display: "flex",
   flexDirection: "column",
-  gap: 0.5,
-  mx: 4,
-  mt: 6,
-  maxWidth: 500,
 };
 
-const rowStyle = {
-  display: "flex",
-  gap: 1,
+// Estilo da área da imagem 
+const mediaStyle = {
+  height: 160,
+  objectFit: "contain",
+  backgroundColor: "#f9f9f9",
 };
 
-const helperTextStyle = {
-  minHeight: "1.5em",
-};
+// Função utilitária para exibir strings ou arrays 
+const formatData = (data) =>
+  Array.isArray(data) ? data.join(", ") : data || "Não informado";
 
-function SearchForm() {
-  const [input, setInput] = useState("");
-  const [error, setError] = useState("");
-  const { dispatch } = useContext(CountriesContext);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError("");
-
-    const trimmed = input.trim();
-
-    if (!trimmed) {
-      setError("Campo de pesquisa não pode ser vazio.");
-      return;
-    }
-
-    dispatch({ type: "SET_QUERY", payload: trimmed });
-  };
-
+// Card que exibe informações de um país 
+function CountryCard({ name, region, subregion, capital, languages, currencies, flag }) {
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={formStyle}>
-      <Box sx={rowStyle}>
-        <TextField label="Buscar país" variant="outlined" value={input} onChange={(e) => setInput(e.target.value)} error={!!error} fullWidth/>
-        <Button type="submit" variant="contained" color="primary">
-          Buscar
-        </Button>
-      </Box>
+    <Card sx={boxStyle}>
+      
+      <CardMedia
+        component="img"
+        image={flag}
+        alt={`Bandeira de ${name}`}
+        sx={mediaStyle}
+      />
 
-      <FormHelperText sx={helperTextStyle} error>
-        {error || " "}
-      </FormHelperText>
-    </Box>
+      <CardContent sx={{ flexGrow: 1 }}>
+        <Typography gutterBottom variant="h6">
+          {name}
+        </Typography>
+
+        <Typography variant="body2" color="text.secondary">
+          Região: {formatData(region)}
+        </Typography>
+
+        {subregion && (
+          <Typography variant="body2" color="text.secondary">
+            Sub-região: {formatData(subregion)}
+          </Typography>
+        )}
+
+        {capital && (
+          <Typography variant="body2" color="text.secondary">
+            Capital: {formatData(capital)}
+          </Typography>
+        )}
+
+        {languages && (
+          <Typography variant="body2" color="text.secondary">
+            Línguas: {formatData(languages)}
+          </Typography>
+        )}
+
+        {currencies && (
+          <Typography variant="body2" color="text.secondary">
+            Moedas: {formatData(currencies)}
+          </Typography>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
-export default SearchForm;
+CountryCard.propTypes = {
+  name: PropTypes.string.isRequired,
+  region: PropTypes.string,
+  subregion: PropTypes.string,
+  capital: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
+  languages: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
+  currencies: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
+  flag: PropTypes.string.isRequired,
+};
+
+export default CountryCard;
