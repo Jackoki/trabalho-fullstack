@@ -1,102 +1,77 @@
-import { useEffect, useContext } from "react";
-import { Grid, Container, Typography, CircularProgress, Button } from "@mui/material";
-import { Link } from "react-router-dom";
-import CountryCard from "./CountryCard";
-import { CountriesContext } from "../contexts/CountriesContext";
-import { AuthContext } from "../contexts/AuthContext";
+import { Card, CardContent, CardMedia, Typography } from "@mui/material";
 
-function CountryList() {
-  const { state, dispatch } = useContext(CountriesContext);
-  const { token } = useContext(AuthContext);
-  const { query, countries, loading, error } = state;
+// Estilos do card principal. Define tamanho, sombra e organização interna.
+const boxStyle = {
+  width: 300,
+  height: 380,
+  borderRadius: 2,
+  boxShadow: 3,
+  display: "flex",
+  flexDirection: "column",
+};
 
-  useEffect(() => {
-    const fetchCountries = async () => {
-      dispatch({ type: "SET_LOADING" });
+// Estilos da área da imagem. Mantém proporções sem distorcer e adiciona fundo neutro.
+const mediaStyle = {
+  height: 160,
+  objectFit: "contain",
+  backgroundColor: "#f9f9f9",
+};
 
-      try {
-        const res = await fetch("http://localhost:443/api/countries", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!res.ok) 
-          throw new Error("Erro ao carregar países");
-
-        const data = await res.json();
-
-        const formatted = data.map((c) => ({
-          name: c.name,
-          region: c.region,
-          subregion: c.subregion || "—",
-          capital: c.capitals?.length ? c.capitals[0] : "—",
-          languages: c.languages || [],
-          currencies: c.currencies || [],
-          flag: c.flag || "",
-        }));
-
-        let results = formatted;
-
-        if (query && query.trim() !== "") {
-          const q = query.toLowerCase();
-          results = formatted.filter(
-            (c) =>
-              c.name.toLowerCase().includes(q)
-          );
-        }
-
-        results.sort((a, b) => a.name.localeCompare(b.name));
-
-        dispatch({ type: "SET_COUNTRIES", payload: results });
-      } 
-      
-      catch (err) {
-        dispatch({ type: "SET_ERROR", payload: err.message });
-      }
-    };
-
-    if (token) 
-      fetchCountries();
-  }, [query, dispatch, token]);
-
-  if (loading) {
-    return (
-      <Container sx={{ py: 4, textAlign: "center" }}>
-        <CircularProgress />
-        <Typography>Carregando países...</Typography>
-      </Container>
-    );
-  }
-
-  if (error || countries.length === 0) {
-    return (
-      <Container sx={{ py: 4, textAlign: "center" }}>
-        <Typography>{error || "Nenhum país encontrado."}</Typography>
-      </Container>
-    );
-  }
-
+// Componente que exibe um país em formato de card. Recebe informações por props e renderiza de forma amigável.
+function CountryCard({ name, region, subregion, capital, languages, currencies, flag }) {
   return (
-    <Container sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Lista de Países
-      </Typography>
+    <Card sx={boxStyle}>
+      
+      {/* Exibição da bandeira */}
+      <CardMedia
+        component="img"
+        image={flag}
+        alt={`Bandeira de ${name}`}
+        sx={mediaStyle}
+      />
 
-      <Button variant="contained" component={Link} to="/add-country" sx={{ mb: 3 }}>
-        Adicionar Novo País
-      </Button>
+      <CardContent sx={{ flexGrow: 1 }}>
+        
+        {/* Nome do país */}
+        <Typography gutterBottom variant="h6" component="div">
+          {name}
+        </Typography>
 
-      <Grid container spacing={3} justifyContent="center" alignItems="center">
-        {countries.map((country, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
-            <CountryCard {...country} />
-          </Grid>
-        ))}
-      </Grid>
-    </Container>
+        {/* Região principal */}
+        <Typography variant="body2" color="text.secondary">
+          Região: {region}
+        </Typography>
+
+        {/* Sub-região (opcional) */}
+        {subregion && (
+          <Typography variant="body2" color="text.secondary">
+            Sub-região: {subregion}
+          </Typography>
+        )}
+
+        {/* Capital (aceita string ou lista) */}
+        {capital && (
+          <Typography variant="body2" color="text.secondary">
+            Capital: {Array.isArray(capital) ? capital.join(", ") : capital}
+          </Typography>
+        )}
+
+        {/* Línguas (aceita string ou lista) */}
+        {languages && (
+          <Typography variant="body2" color="text.secondary">
+            Línguas: {Array.isArray(languages) ? languages.join(", ") : languages}
+          </Typography>
+        )}
+
+        {/* Moedas (aceita string ou lista) */}
+        {currencies && (
+          <Typography variant="body2" color="text.secondary">
+            Moedas: {Array.isArray(currencies) ? currencies.join(", ") : currencies}
+          </Typography>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
-export default CountryList;
+export default CountryCard;
