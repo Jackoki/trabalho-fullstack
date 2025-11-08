@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 function AddCountry() {
   const navigate = useNavigate();
 
+  // Estado do formulário
   const [form, setForm] = useState({
     name: "",
     region: "",
@@ -23,40 +24,51 @@ function AddCountry() {
     currencies: "",
   });
 
+  // Atualiza o estado conforme o usuário digita
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Submete o formulário e envia os dados para a API
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Você precisa estar logado para realizar esta ação.");
+      return navigate("/login");
+    }
 
+    // Preparação dos dados antes do envio
     const body = {
       name: form.name,
       region: form.region,
       subregion: form.subregion,
       flag: form.flag,
-      capitals: form.capitals.split(",").map((c) => c.trim()),
-      languages: form.languages.split(",").map((l) => l.trim()),
-      currencies: form.currencies.split(",").map((c) => c.trim()),
+      capitals: form.capitals ? form.capitals.split(",").map((c) => c.trim()) : [],
+      languages: form.languages ? form.languages.split(",").map((l) => l.trim()) : [],
+      currencies: form.currencies ? form.currencies.split(",").map((c) => c.trim()) : [],
     };
 
-    const res = await fetch("http://localhost:443/api/countries", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(body),
-    });
+    try {
+      const res = await fetch("http://localhost:443/api/countries", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
 
-    if (res.ok) {
-      navigate("/countries");
-    } 
-    
-    else {
-      alert("Erro ao inserir país");
+      if (res.ok) {
+        navigate("/countries");
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData.message || "Erro ao inserir país.");
+      }
+    } catch (error) {
+      console.error("Erro ao conectar ao servidor:", error);
+      alert("Falha de conexão. Verifique se o backend está rodando.");
     }
   };
 
@@ -72,16 +84,64 @@ function AddCountry() {
           onSubmit={handleSubmit}
           sx={{ display: "grid", gap: 2 }}
         >
-          <TextField label="Nome" name="name" value={form.name} onChange={handleChange} required />
-          <TextField label="Região" name="region" value={form.region} onChange={handleChange} required />
-          <TextField label="Sub-região" name="subregion" value={form.subregion} onChange={handleChange} />
-          <TextField label="URL da Bandeira (PNG)" name="flag" value={form.flag} onChange={handleChange} />
-          <TextField label="Capitais (separe por vírgula)" name="capitals" value={form.capitals} onChange={handleChange}/>
-          <TextField label="Línguas (separe por vírgula)" name="languages" value={form.languages} onChange={handleChange}/>
-          <TextField label="Moedas (separe por vírgula)" name="currencies" value={form.currencies} onChange={handleChange}/>
+          <TextField
+            label="Nome"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            required
+          />
+
+          <TextField
+            label="Região"
+            name="region"
+            value={form.region}
+            onChange={handleChange}
+            required
+          />
+
+          <TextField
+            label="Sub-região"
+            name="subregion"
+            value={form.subregion}
+            onChange={handleChange}
+          />
+
+          <TextField
+            label="URL da Bandeira (PNG)"
+            name="flag"
+            value={form.flag}
+            onChange={handleChange}
+            type="url"
+          />
+
+          <TextField
+            label="Capitais (separe por vírgula)"
+            name="capitals"
+            value={form.capitals}
+            onChange={handleChange}
+          />
+
+          <TextField
+            label="Línguas (separe por vírgula)"
+            name="languages"
+            value={form.languages}
+            onChange={handleChange}
+          />
+
+          <TextField
+            label="Moedas (separe por vírgula)"
+            name="currencies"
+            value={form.currencies}
+            onChange={handleChange}
+          />
 
           <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ mt: 2 }}>
-            <Button variant="outlined" color="secondary" onClick={() => navigate("/countries")}>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => navigate("/countries")}
+            >
               Voltar
             </Button>
 
