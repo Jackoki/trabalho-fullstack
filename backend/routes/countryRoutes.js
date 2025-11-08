@@ -33,15 +33,15 @@ const validateCountry = [
 
   body("capitals")
     .optional()
-    .isArray().withMessage("Capitais deve ser uma lista (array)."),
+    .isArray().withMessage("O campo de capital/capitais não pode ser vazia."),
 
   body("languages")
     .optional()
-    .isArray().withMessage("Idiomas deve ser uma lista (array)."),
+    .isArray().withMessage("O campo de idioma/idiomas não pode ser vazia."),
 
   body("currencies")
     .optional()
-    .isArray().withMessage("Moedas deve ser uma lista (array)."),
+    .isArray().withMessage("O campo de moeda/moedas não pode ser vazia."),
 ];
 
 // GET /countries Lista todos os países.
