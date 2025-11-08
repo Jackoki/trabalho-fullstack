@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import {
   Container,
@@ -10,17 +10,29 @@ import {
   Alert,
 } from "@mui/material";
 
+// Tela de Login Realiza autenticação chamando o backend e salva o token no contexto.
 function Login() {
   const { login } = useContext(AuthContext);
+
+  // Estado do formulário
   const [form, setForm] = useState({ username: "", password: "" });
-  const [error, setError] = useState(""); 
+
+  // Controle de erro e loading
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Foca automaticamente no campo de usuário ao abrir a tela
+  useEffect(() => {
+    document.querySelector('input[name="username"]')?.focus();
+  }, []);
+
+  // Atualiza o formulário conforme o usuário digita. Também limpa mensagens de erro para não ficar exibindo alert à toa.
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setError("");
   };
 
+  // Envia os dados para o backend e realiza login.
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -34,18 +46,14 @@ function Login() {
 
       const data = await res.json();
 
-      if (res.ok) {
+      if (res.ok && data.token) {
         login(data.token);
-        window.location.href = "/countries";
-      } 
-
-      else {
-        setError(data.message || "Erro ao fazer login");
+        window.location.href = "/countries"; // Redireciona após login
+      } else {
+        setError(data.message || "Credenciais inválidas");
       }
-    } 
-    
-    catch (err) {
-      setError("Erro ao conectar ao servidor");
+    } catch (err) {
+      setError("Erro ao conectar ao servidor. Verifique se o backend está rodando.");
     }
 
     setLoading(false);
@@ -58,20 +66,27 @@ function Login() {
           Login
         </Typography>
 
+        {/* Exibe mensagem de erro quando existir */}
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ display: "grid", gap: 2 }}>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{ display: "grid", gap: 2 }}
+        >
           <TextField
             label="Usuário"
             name="username"
             value={form.username}
             onChange={handleChange}
             required
+            autoComplete="username"
           />
+
           <TextField
             label="Senha"
             name="password"
@@ -79,6 +94,7 @@ function Login() {
             value={form.password}
             onChange={handleChange}
             required
+            autoComplete="current-password"
           />
 
           <Button
