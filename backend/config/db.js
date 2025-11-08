@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+//Função para criar banco de dados e definir as variáveis de conexão do banco
 const connection = await mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,

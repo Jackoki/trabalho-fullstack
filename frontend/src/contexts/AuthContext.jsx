@@ -3,6 +3,7 @@ import { createContext, useState, useEffect } from "react";
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
+  //Hook para apagar o token na hora de realizar logout no sistema.
   const [token, setToken] = useState(localStorage.getItem("token"));
 
   const login = (token) => {

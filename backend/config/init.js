@@ -1,5 +1,6 @@
 import { db } from "./db.js";
 
+//Função para iniciar e criar tabelas caso o banco de dados não tenha as tabelas
 export async function initDatabase() {
   const conn = await db.getConnection();
 

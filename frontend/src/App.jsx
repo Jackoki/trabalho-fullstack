@@ -11,12 +11,15 @@ import LogoutButton from "./components/LogoutButton";
 
 function App() {
   return (
+    // Contexto de autenticação disponível para toda a aplicação
     <AuthProvider>
       <BrowserRouter>
         <CountriesProvider>
           <Routes>
+            {/* Login como rota inicial */}
             <Route path="/" element={<Login />} />
 
+            {/* Lista de países + barra de busca, apenas se autenticado */}
             <Route path="/countries" element={
               <ProtectedRoute>
                 <>
@@ -28,6 +31,7 @@ function App() {
               }
             />
 
+            {/* Página de inserção de novo país, protegida */}
             <Route path="/add-country"element={
               <ProtectedRoute>
                 <>
@@ -38,6 +42,7 @@ function App() {
               }
             />
 
+            {/* Qualquer rota desconhecida redireciona dinamicamente */}
             <Route path="*" element={
               <Navigate to={localStorage.getItem("token") ? "/countries" : "/"} replace/>
               }

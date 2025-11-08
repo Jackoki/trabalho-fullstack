@@ -21,6 +21,8 @@ const helperTextStyle = {
 };
 
 function SearchForm() {
+  //Função de pesquisa do qual usa um hook para verificar o que é escrito no formulário
+  //Se ele estiver vazio na hora de pesquisar, retornará o erro de campo de pesquisa não pode ser vazio
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const { dispatch } = useContext(CountriesContext);

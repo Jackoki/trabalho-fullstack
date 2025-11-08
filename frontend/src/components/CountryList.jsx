@@ -6,6 +6,8 @@ import { CountriesContext } from "../contexts/CountriesContext";
 import { AuthContext } from "../contexts/AuthContext";
 
 function CountryList() {
+
+  //Uso de UseContext para resgatar as informações da API e inserir no componente
   const { state, dispatch } = useContext(CountriesContext);
   const { token } = useContext(AuthContext);
   const { query, countries, loading, error } = state;
@@ -14,6 +16,7 @@ function CountryList() {
     const fetchCountries = async () => {
       dispatch({ type: "SET_LOADING" });
 
+      //Chamado da função de resgatar os países do banco de dados pelo backend
       try {
         const res = await fetch("http://localhost:443/api/countries", {
           headers: {
@@ -27,6 +30,7 @@ function CountryList() {
 
         const data = await res.json();
 
+        //Preenche as informações pelo JSON do backend
         const formatted = data.map((c) => ({
           name: c.name,
           region: c.region,
@@ -47,6 +51,7 @@ function CountryList() {
           );
         }
 
+        //Retorno das informações em ordem alfabetica
         results.sort((a, b) => a.name.localeCompare(b.name));
 
         dispatch({ type: "SET_COUNTRIES", payload: results });
@@ -61,6 +66,7 @@ function CountryList() {
       fetchCountries();
   }, [query, dispatch, token]);
 
+  //Enquanto estiver carregando, será carregado um componente falando que está carregando
   if (loading) {
     return (
       <Container sx={{ py: 4, textAlign: "center" }}>
@@ -70,6 +76,7 @@ function CountryList() {
     );
   }
 
+  //Se nenhum país for encontrado ou der erro, será retornado que nenhum país foi encontrado
   if (error || countries.length === 0) {
     return (
       <Container sx={{ py: 4, textAlign: "center" }}>
@@ -78,6 +85,7 @@ function CountryList() {
     );
   }
 
+  //Chamada dos botões e os cards
   return (
     <Container sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom>

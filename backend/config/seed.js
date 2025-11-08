@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import { db } from "./db.js";
 
+//Função utilizada para inserir os dados no banco de dados caso esteja vazio
 export async function seedDatabase() {
   const [users] = await db.query("SELECT COUNT(*) AS count FROM users");
   if (users[0].count === 0) {
